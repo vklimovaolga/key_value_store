@@ -27,11 +27,28 @@ start_link() ->
 %%                  modules => modules()}   % optional
 init([]) ->
     SupFlags = #{
-        strategy => one_for_all,
-        intensity => 0,
-        period => 1
+        strategy => one_for_one,
+        intensity => 1,
+        period => 5
     },
-    ChildSpecs = [],
+    ChildSpecs = [
+        #{
+            id => key_value_store_storage,
+            start => {key_value_store_storage, start_link, []},
+            restart => permanent,
+            shutdown => 5000,
+            type => worker,
+            modules => [key_value_store_storage]
+        },
+        #{
+            id => key_value_store_http,
+            start => {key_value_store_http, start_link, []},
+            restart => permanent,
+            shutdown => 5000,
+            type => worker,
+            modules => [key_value_store_http]
+        }
+    ],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions

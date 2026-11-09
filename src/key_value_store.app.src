@@ -5,7 +5,9 @@
     {mod, {key_value_store_app, []}},
     {applications, [
         kernel,
-        stdlib
+        stdlib,
+        cowboy,
+        jsx
     ]},
     {env, []},
     {modules, []},
