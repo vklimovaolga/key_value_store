@@ -51,29 +51,15 @@ handle_request(<<"GET">>, Req0, State) ->
                 <<"value">> => Value
             },
 
-            Body = jsx:encode(Response),
-
-            Req = cowboy_req:reply(
-                200,
-                #{<<"content-type">> => <<"application/json">>},
-                Body,
-                Req0
-            ),
-
-            {ok, Req, State};
+            reply_json(200, Response, Req0, State);
 
         {error, not_found} ->
-            Response = #{<<"error">> => <<"Key not found">>},
-            Body = jsx:encode(Response),
-
-            Req = cowboy_req:reply(
+            reply_json(
                 404,
-                #{<<"content-type">> => <<"application/json">>},
-                Body,
-                Req0
-            ),
-
-            {ok, Req, State}
+                #{<<"error">> => <<"Key not found">>},
+                Req0,
+                State
+            )
     end;
 
 handle_request(<<"DELETE">>, Req0, State) ->
@@ -99,16 +85,7 @@ handle_request(<<"DELETE">>, Req0, State) ->
 
 handle_request(_Method, Req0, State) ->
     Response = #{<<"error">> => <<"Method not allowed">>},
-    Body = jsx:encode(Response),
-
-    Req = cowboy_req:reply(
-        405,
-        #{<<"content-type">> => <<"application/json">>},
-        Body,
-        Req0
-    ),
-
-    {ok, Req, State}.
+    reply_json(405, Response, Req0, State).
 
 reply_json(Status, Response, Req0, State) ->
     Body = jsx:encode(Response),

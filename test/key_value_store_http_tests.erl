@@ -23,7 +23,11 @@ tests(_State) ->
     [
         ?_test(test_put_and_get()),
         ?_test(test_get_missing_key()),
-        ?_test(test_delete_key())
+        ?_test(test_delete_key()),
+        ?_test(test_put_invalid_json()),
+        ?_test(test_put_missing_value()),
+        ?_test(test_delete_missing_key()),
+        ?_test(test_method_not_allowed())
     ].
 
 test_put_and_get() ->
@@ -67,3 +71,43 @@ test_delete_key() ->
 
     {ok, {{_, 404, _}, _, _}} =
         httpc:request(Url).
+
+
+test_put_invalid_json() ->
+    Url = "http://localhost:8081/store/invalid_json_test",
+
+    {ok, {{_, 400, _}, _, _}} =
+        httpc:request(
+            put,
+            {Url, [], "application/json", "{\"value\":"},
+            [],
+            []
+        ).
+
+test_put_missing_value() ->
+    Url = "http://localhost:8081/store/missing_value_test",
+
+    {ok, {{_, 400, _}, _, _}} =
+        httpc:request(
+            put,
+            {Url, [], "application/json", "{\"name\":\"Olga\"}"},
+            [],
+            []
+        ).
+
+test_delete_missing_key() ->
+    Url = "http://localhost:8081/store/delete_missing_test",
+
+    {ok, {{_, 404, _}, _, _}} =
+        httpc:request(delete, {Url, []}, [], []).
+
+test_method_not_allowed() ->
+    Url = "http://localhost:8081/store/method_test",
+
+    {ok, {{_, 405, _}, _, _}} =
+        httpc:request(
+            post,
+            {Url, [], "application/json", "{}"},
+            [],
+            []
+        ).
